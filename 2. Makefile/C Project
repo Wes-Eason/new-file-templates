@@ -1,0 +1,102 @@
+# My First Real Makefile
+#
+# For building C programs
+#
+# Assumes output is to a terminal with vt100 support
+# Header dependencies not yet implemented
+#
+# This file is out of date and will be updated soon
+
+PROG := xml-parse
+
+CC := gcc
+CFLAGS := -g -std=c99 -Wall
+
+LINKER := gcc
+LIBS := 
+LINKER_FLAGS := -lc
+
+SHELL := /bin/bash
+
+SRC_DIR = src
+OBJ_DIR = obj
+BIN_DIR = bin
+DEP_DIR = dep
+
+SOURCES = $(wildcard $(SRC_DIR)/*.c)
+OBJECTS = $(SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+DEPENDS = $(SOURCES:$(SRC_DIR)/%.c=$(DEP_DIR)/%.d)
+
+LINK_TO_BIN = $(PROG)
+
+.PHONY: all
+all: mkfs
+all: build
+all: shortcut
+
+.PHONY: test
+test: all
+	@ echo "Running tests..." 
+	@ ./run tests
+	@ echo "Tests complete"
+
+.PHONY: build
+build: mkfs
+build: print_head
+build: $(OBJECTS)
+build: $(BIN_DIR)/$(PROG)
+build: print_tail
+
+.PHONY: shortcut
+shortcut: $(OBJECTS)
+shortcut: $(BIN_DIR)/$(PROG)
+	@ if [ ! -e "$(PROG)" ]; then \
+		ln -s "$$(readlink -f $(BIN_DIR)/$(PROG))" $(PROG); \
+	  fi
+
+.PHONY: mkfs
+mkfs: mkdir-$(OBJ_DIR)
+mkfs: mkdir-$(BIN_DIR)
+mkfs: mkdir-$(DEP_DIR)
+
+# Link step
+$(BIN_DIR)/$(PROG): $(OBJECTS)
+	@ echo -e "[\e[33mlink\e[0m]: $^/";\
+	@$(LINKER) -o $@ $(LIBS) $^ $(LINKER_FLAGS)
+
+# Compile
+$(OBJECTS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c 
+	@ echo -e "[\e[33mbuild\e[0m]: $^"
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+# Looks good
+.PHONY: print_head
+print_head: 
+	@echo "#############################################"
+	@echo -e "[\e[33mbuild started\e[0m] \e[32m"$$(date)"\e[0m"
+	@echo "#############################################"
+	
+.PHONY: print_tail
+print_tail:
+	@echo "#############################################"
+	@echo -e "[\e[33mbuild complete\e[0m] \e[32m"$$(date)"\e[0m"
+	@echo "#############################################"	
+
+# You know, clean
+.PHONY: clean
+clean: 
+	@ rm -f *.o *.d $(PROG)
+	@ rm -f -r $(BIN_DIR)
+	@ rm -f -r $(OBJ_DIR)
+	@ rm -f -r $(DEP_DIR)
+	@ rm -f out.txt
+	
+# Used to make required directories
+.PHONY: mkdir-%
+mkdir-%: 
+	@ if [ ! -d "$*" ]; then \
+	mkdir -p "$*";\
+	echo -e "[\e[33mmkdir\e[0m]: $*/";\
+	fi
+
+
