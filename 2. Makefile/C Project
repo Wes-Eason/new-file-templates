@@ -1,88 +1,70 @@
-# My First Real Makefile
-#
-# For building C programs
-#
-# Assumes output is to a terminal with vt100 support
-# Header dependencies not yet implemented
-#
-# This file is out of date and will be updated soon
+# Good starting point for Debug builds of C projects
+# Known Problems:
+#	- Linking to libs has not been tested
+#	- All object files are linked into targets, regardless of relevance
 
-PROG := xml-parse
+BUILD_TARGETS = $(BIN_DIR)/test
 
-CC := gcc
-CFLAGS := -g -std=c99 -Wall
+CC = gcc
+CFLAGS = -iquote"$(SRC_DIR)" -g3 -std=c99 -Wall
 
-LINKER := gcc
-LIBS := 
-LINKER_FLAGS := -lc
+LINKER = gcc
+LINKER_FLAGS = 
 
-SHELL := /bin/bash
+SHELL = /bin/bash
 
 SRC_DIR = src
 OBJ_DIR = obj
-BIN_DIR = bin
+BIN_DIR = .
 DEP_DIR = dep
 
-SOURCES = $(wildcard $(SRC_DIR)/*.c)
+SOURCES = $(shell find $(SRC_DIR) -type f -name *.c)
 OBJECTS = $(SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 DEPENDS = $(SOURCES:$(SRC_DIR)/%.c=$(DEP_DIR)/%.d)
 
-LINK_TO_BIN = $(PROG)
+-include $(DEPENDS)
 
 .PHONY: all
 all: mkfs
 all: build
-all: shortcut
-
-.PHONY: test
-test: all
-	@ echo "Running tests..." 
-	@ ./run tests
-	@ echo "Tests complete"
 
 .PHONY: build
 build: mkfs
 build: print_head
 build: $(OBJECTS)
-build: $(BIN_DIR)/$(PROG)
+build: $(BUILD_TARGETS)
 build: print_tail
 
-.PHONY: shortcut
-shortcut: $(OBJECTS)
-shortcut: $(BIN_DIR)/$(PROG)
-	@ if [ ! -e "$(PROG)" ]; then \
-		ln -s "$$(readlink -f $(BIN_DIR)/$(PROG))" $(PROG); \
-	  fi
-
 .PHONY: mkfs
-mkfs: mkdir-$(OBJ_DIR)
-mkfs: mkdir-$(BIN_DIR)
-mkfs: mkdir-$(DEP_DIR)
-
-# Link step
-$(BIN_DIR)/$(PROG): $(OBJECTS)
-	@ echo -e "[\e[33mlink\e[0m]: $^/";\
-	@$(LINKER) -o $@ $(LIBS) $^ $(LINKER_FLAGS)
+mkfs:
+	@ [ -d "$(OBJ_DIR)" -o -z "$(OBJ_DIR)" ] || mkdir -p "$(OBJ_DIR)"
+	@ [ -d "$(BIN_DIR)" -o -z "$(BIN_DIR)" ] || mkdir -p "$(BIN_DIR)"
+	@ [ -d "$(DEP_DIR)" -o -z "$(DEP_DIR)" ] || mkdir -p "$(DEP_DIR)"
+# Link
+# TODO: targets only depend on relevant objects
+$(BUILD_TARGETS): $(BIN_DIR)/%: $(OBJECTS)
+	@ echo -e "[ Link ]: $^/";\
+	$(LINKER) $(LINKER_FLAGS) -o $@ $(LIBS) $^ 
 
 # Compile
 $(OBJECTS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c 
-	@ echo -e "[\e[33mbuild\e[0m]: $^"
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@ echo -e "[ build ]: $^"
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Looks good
 .PHONY: print_head
 print_head: 
-	@echo "#############################################"
-	@echo -e "[\e[33mbuild started\e[0m] \e[32m"$$(date)"\e[0m"
-	@echo "#############################################"
+	@echo "################################################"
+	@echo "# build started : $$(date) #"
+	@echo "################################################"
 	
 .PHONY: print_tail
 print_tail:
-	@echo "#############################################"
-	@echo -e "[\e[33mbuild complete\e[0m] \e[32m"$$(date)"\e[0m"
-	@echo "#############################################"	
+	@echo "#################################################"
+	@echo "# build complete : $$(date) #"
+	@echo "#################################################"	
 
-# You know, clean
+# cleans up
 .PHONY: clean
 clean: 
 	@ rm -f *.o *.d $(PROG)
@@ -91,12 +73,5 @@ clean:
 	@ rm -f -r $(DEP_DIR)
 	@ rm -f out.txt
 	
-# Used to make required directories
-.PHONY: mkdir-%
-mkdir-%: 
-	@ if [ ! -d "$*" ]; then \
-	mkdir -p "$*";\
-	echo -e "[\e[33mmkdir\e[0m]: $*/";\
-	fi
 
 
