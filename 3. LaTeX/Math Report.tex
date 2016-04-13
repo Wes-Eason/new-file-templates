@@ -1,21 +1,58 @@
 \documentclass[fleqn]{report}
+
+\newcommand{\doctitle}{New Document}
+\newcommand{\docauthor}{Author}
+\newcommand{\docdate}{\today}
+
+% General packages
 \usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{multicol}
+\usepackage[document]{ragged2e}
 \usepackage{color}
 
-\usepackage{hyperref}
+% utility Packages
+\usepackage{lipsum}
+
+% Math packages
+\usepackage[fleqn]{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+% tikz libraries
+\usepackage{tikz}
+\usetikzlibrary{patterns}
+
+% Set up hyperref package
+\usepackage[pdftex]{hyperref}
 \hypersetup{
     colorlinks,
     citecolor=black,
     filecolor=black,
     linkcolor=black,
-    urlcolor=black
+    urlcolor=black,
+%	pdfcreator{},
+%	pdfproducer{},
+%	pdfkeywords={separate;with;semicolons},
+%	pdfsubject{},
+	pdftitle={\doctitle},
+	pdfauthor={\docauthor}
 }
 
-\usepackage[fleqn]{amsmath}
-\usepackage{amssymb}
-\usepackage{mathtools}
+% Define styles for headings
+\usepackage{titlesec}
+\titleformat{\section}{\Large\scshape\raggedright}{\S\thesection}{1em}{}[\titlerule]
+\titlespacing{\section}{0pt}{0.75ex}{1ex}
+\titleformat{\chapter}[block]
+	{\titlerule\LARGE\bfseries}{\parbox{0.15\linewidth}{\thechapter.}}{1ex}
+	{\parbox{0.8\linewidth}}[\vspace{1ex}{\titlerule}]
 
-\usepackage{tikz}
+% Paragraph Formatting
+\setlength{\parindent}{4em}
+\setlength{\parskip}{1em}
+\renewcommand{\baselinestretch}{1.25}
+
+
+% Macros for commonly used sets
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\nats}{\mathbb{N}}
 \newcommand{\rationals}{\mathbb{Q}}
@@ -24,6 +61,7 @@
 \newcommand{\complexnums}{\mathbb{C}}
 \newcommand{\quaternions}{\mathbb{H}}
 
+% Colors for math homework symbols
 \definecolor{origeqn}{rgb}{0.0, 0.5, 0.0}
 \definecolor{unsolved}{rgb}{0.7, 0.7, 0.0}
 \definecolor{question}{rgb}{1.0, 0.0, 0.0}
@@ -34,16 +72,11 @@
 \newcommand{\needhelp}{\color{question}\textbf{???}}
 \newcommand{\skipped}{\color{grey} --skipped--}
 
-\title{Math 204 Midterm Practice}
-\author{Wes Eason}
-\date{31 January 2016}
+% Title Information
+\title{\Huge \doctitle}
+\author{\docauthor}
+\date{\today}
+
 
 % ############################# DOCUMENT BEGIN #################################
-\begin{document}
-\maketitle
-
-\tableofcontents
-
-
-\end{document}
 
